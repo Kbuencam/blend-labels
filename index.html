@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Label Printer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f1ec;--card:#fff;--ink:#1d1b19;--mut:#6f6a63;--line:#ebe6de;--acc:#1d1b19;--ok:#1f7a4d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Nunito",ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-weight:400}
+.wrap{max-width:760px;margin:0 auto;padding:16px 14px 40px}
+h1{font-size:22px;font-weight:700;margin:6px 4px 16px;letter-spacing:.2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:18px;margin-bottom:14px;box-shadow:0 2px 12px rgba(60,50,30,.05)}
+label{display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--mut);margin:0 0 6px}
+input,select{width:100%;font-family:inherit;font-size:18px;font-weight:600;padding:13px 14px;border:1.5px solid var(--line);border-radius:16px;background:#fff;color:var(--ink)}
+input:focus,select:focus{outline:none;border-color:var(--acc)}
+input:disabled,select:disabled{background:#f1eee9;color:#8a857d}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.f{margin-top:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{font-family:inherit;border:1.5px solid var(--line);background:#faf8f5;border-radius:999px;padding:10px 16px;font-size:15px;font-weight:600;color:var(--ink);cursor:pointer}
+.chip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.chip.al.on{background:#b4561b;border-color:#b4561b}
+.chip.di.on{background:#2f6f4f;border-color:#2f6f4f}
+.tabs .chip{border-radius:999px}
+.stage{display:flex;justify-content:center;padding:18px;background:repeating-linear-gradient(45deg,#efebe4,#efebe4 10px,#f4f1ec 10px,#f4f1ec 20px);border-radius:18px}
+#prev{position:relative;background:#fff;color:#000;border:1px solid #bbb;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.15);overflow:hidden;font-family:Arial,Helvetica,sans-serif;font-weight:800}
+#prev div{position:absolute}
+.cap{text-align:center;font-size:13px;color:var(--mut);margin-top:8px}
+.btn{width:100%;font-family:inherit;font-size:18px;font-weight:700;padding:17px;border-radius:999px;border:0;cursor:pointer}
+.btn.main{background:var(--acc);color:#fff}
+.btn.sec{background:#fff;color:var(--ink);border:1.5px solid var(--line);font-size:15px;padding:13px;font-weight:600;margin-top:8px}
+#msg{min-height:22px;font-size:14px;color:var(--mut);text-align:center;margin-top:10px}
+#msg.ok{color:var(--ok);font-weight:600}
+summary{cursor:pointer;font-weight:600;font-size:15px;padding:6px 0;color:var(--mut)}
+.note{background:#fff7e6;border-color:#f0dcae;font-size:15px;padding:14px 18px}
+.hide{display:none}
+.sec{margin-top:20px;padding-top:18px;border-top:1.5px dashed var(--line)}
+.sec>label:first-child{margin-bottom:10px}
+.sec .chips{margin-top:0}
+#printArea{display:none}
+@media print{body>.wrap{display:none!important}#printArea{display:block}@page{margin:0}}
+</style></head><body>
+<div class="wrap">
+<h1>Label Printer</h1>
+
+
+
+<div class="card">
+  <label>Made by (prints bottom right)</label>
+  <input id="byn" placeholder="Your name or initials" maxlength="14" autocapitalize="characters">
+</div>
+
+<div class="card">
+  <label>Label type</label>
+  <div class="chips tabs" id="tabs" style="margin-top:0"></div>
+
+  <!-- Preset items -->
+  <div id="presetBox" class="hide">
+    <div class="sec"><label>Item</label><div class="chips" id="items"></div></div>
+    <div class="sec" id="datebox"><label>Dates</label><div class="row" style="margin-top:0">
+      <div><label>Date made</label><input id="date" type="date"></div>
+      <div><label id="udl">Use by in (days)</label><input id="ud" type="number" min="0" inputmode="numeric" placeholder="set days"></div>
+    </div></div>
+    <div id="albox" class="sec"><label>Contains (allergens)</label><div class="chips" id="als"></div></div>
+    <div id="dibox" class="sec"><label>Dietary notes</label><div class="chips" id="dis"></div></div>
+  </div>
+
+  <!-- Custom wording -->
+  <div id="customBox">
+    <div class="sec"><label>Label wording</label>
+    <input id="txt" value="USE FIRST" maxlength="40" autocapitalize="characters">
+    <div class="chips" id="chips" style="margin-top:10px"></div></div>
+    <div class="sec"><div class="row" style="margin-top:0">
+      <div><label>Date</label><input id="date2" type="date"></div>
+      <div><label>Date prefix (optional)</label><input id="pre" placeholder="Made, Exp…"></div>
+    </div>
+    <div class="f"><label>Add days (use-by)</label><input id="add" type="number" value="0" min="0" inputmode="numeric"></div>
+    </div>
+  </div>
+
+  <div class="sec"><label>Copies</label><input id="qty" type="number" value="1" min="1" max="500" inputmode="numeric"></div>
+</div>
+
+<div class="card">
+  <div class="stage"><div id="prev"></div></div>
+  <div class="cap" id="cap"></div>
+</div>
+
+<button class="btn main" id="bb">Print via Bluetooth</button>
+<div id="msg"></div>
+
+<div class="card note" style="margin-top:14px"><b>Printer:</b> when you tap Print, choose Bluetooth device <b>DFJ222800908</b>.
+<div style="margin-top:10px"><b>Not connecting, or printing rows of code?</b><br>
+1. Turn the printer off and on.<br>
+2. Close the Zebra app and any other device connected to it.<br>
+3. Tap the button below, then print again.</div>
+<button class="btn sec" id="bje2" style="margin-top:10px">Exit hex-dump mode</button></div>
+
+<div class="card" style="margin-top:14px">
+<details>
+  <summary>Label setup (size &amp; position)</summary>
+  <div class="f"><label>Label size (inches)</label>
+  <select id="size">
+    <option value="0.9,0.9">0.9 × 0.9</option>
+    <option value="1.25,1.25">1.25 × 1.25</option>
+    <option value="1.5,1.5">1.5 × 1.5</option>
+    <option value="2,1">2 × 1</option>
+    <option value="2.25,1.25">2.25 × 1.25</option>
+    <option value="3,2">3 × 2</option>
+    <option value="4,2">4 × 2</option>
+    <option value="4,6">4 × 6</option>
+    <option value="custom">Custom…</option>
+  </select></div>
+  <div class="row" id="cust" style="display:none">
+    <div><label>Width (in)</label><input id="cw" type="number" step="0.05" value="0.9" inputmode="decimal"></div>
+    <div><label>Height (in)</label><input id="ch" type="number" step="0.05" value="0.9" inputmode="decimal"></div>
+  </div>
+  <div class="row">
+    <div><label>Nudge left / right (+ right)</label><input id="nx" type="number" value="0" step="2" inputmode="numeric"></div>
+    <div><label>Nudge up / down (+ down)</label><input id="ny" type="number" value="0" step="2" inputmode="numeric"></div>
+  </div>
+  <div class="f"><label>Print style</label>
+  <select id="pstyle"><option value="img">Modern font (image – slower)</option><option value="txt">Printer font (fast)</option></select></div>
+  <div class="f"><button class="btn sec" id="lock" style="margin-top:0"></button>
+  <div class="cap" id="lockcap" style="text-align:left"></div></div>
+</details>
+</div>
+
+<div class="card">
+<details>
+  <summary>More print options</summary>
+  <div class="f"><label>Printer IP (Wi-Fi / Ethernet models)</label>
+  <input id="ip" placeholder="e.g. 192.168.1.50" inputmode="decimal"></div>
+  <button class="btn sec" id="bn">Print to printer IP</button>
+  <button class="btn sec" id="bp">Zebra Browser Print (PC / Mac)</button>
+  <button class="btn sec" id="bs">System print dialog</button>
+  <button class="btn sec" id="bd">Download .zpl file</button>
+  <button class="btn sec" id="bje">Exit hex-dump mode (~JE) over Bluetooth</button>
+  <button class="btn sec" id="bcal">Calibrate label sensor (~JC)</button>
+</details>
+</div>
+</div>
+<div id="printArea"></div>
+
+<script>
+const DPI=203;
+const $=id=>document.getElementById(id);
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+/* ---------- Preset data ---------- */
+const CATS=[
+ {id:"oni",name:"Onigiri",by:"SELL BY",noMade:true,al:true,items:["Aburi Salmon","Spicy Salmon Tartare","Beef Bulgogi","Tuna Mayo"]},
+ {id:"milk",name:"Milk Teas",by:"USE BY",al:true,items:["Black Milk Tea","Earl Grey Tea","Jasmine Tea","Thai Tea","Oolong Tea"]},
+ {id:"tea",name:"Teas",by:"USE BY",al:false,items:["Jasmine Tea","Hibiscus Tea","Butterfly Tea"]},
+ {id:"other",name:"Other",by:"USE BY",al:true,items:["Vanilla Syrup","Simple Syrup","Macerated Mango","Macerated Strawberries","Macerated Berries","Grapefruit","Bubble Waffle Mix","Condensed Milk","Ube Sauce","Batch Matcha"]},
+ {id:"pow",name:"Powders",by:"FLIP BY",al:false,items:["Matcha","Taro","Coconut","Cappuccino","Chocolate","Honeydew","French Vanilla"]}
+];
+const DIETARY=["Caffeine","Vegan","Vegetarian","Gluten free","Dairy free","Sugar free"];
+const ALLERGENS=["Dairy","Wheat","Egg","Soy","Fish","Shellfish","Nuts","Sesame"];
+const WORDS=["USE FIRST","USE BY","OPENED","MADE","PREPPED","DISCARD"];
+
+let mode=store.get("lp2_mode")||"custom";   // "custom" or a category id
+let item=store.get("lp2_item")||"";
+const cat=()=>CATS.find(c=>c.id===mode);
+
+/* ---------- Init values ---------- */
+const today=new Date();today.setMinutes(today.getMinutes()-today.getTimezoneOffset());
+$("date").value=$("date2").value=today.toISOString().slice(0,10);
+const PERSIST=["pstyle","byn","txt","pre","add","qty","size","cw","ch","ip","nx","ny"];
+PERSIST.forEach(i=>{const v=store.get("lp2_"+i);if(v!==null&&v!=="")$(i).value=v});
+if(!$("size").value)$("size").value="0.9,0.9";
+// keep the two date boxes in sync
+$("date").addEventListener("input",()=>{$("date2").value=$("date").value});
+$("date2").addEventListener("input",()=>{$("date").value=$("date2").value});
+
+/* ---------- Helpers ---------- */
+function dims(){
+  const c=$("size").value==="custom";
+  $("cust").style.display=c?"grid":"none";
+  const [w,h]=c?[+$("cw").value||2,+$("ch").value||1]:$("size").value.split(",").map(Number);
+  return{w:Math.round(w*DPI),h:Math.round(h*DPI),wi:w,hi:h};
+}
+function addDays(n){const d=new Date($("date").value+"T12:00:00");d.setDate(d.getDate()+n);return d}
+function shortDate(d){return d.toLocaleDateString("en-US",{month:"short",day:"numeric"}).toUpperCase()}
+function customDateText(){
+  const d=addDays(+$("add").value||0);
+  const s=d.toLocaleDateString("en-CA",{year:"numeric",month:"short",day:"numeric"}).toUpperCase().replace(/\./g,"");
+  return ($("pre").value.trim()?$("pre").value.trim().toUpperCase()+" ":"")+s;
+}
+const FONT='"Nunito","Quicksand","Segoe UI",system-ui,sans-serif';
+const MC=(()=>{try{return document.createElement("canvas").getContext("2d")}catch(e){return null}})();
+function tw(t,fs){
+  if($("pstyle").value==="img"&&MC){MC.font="700 "+fs+"px "+FONT;return MC.measureText(t).width}
+  return t.length*fs*0.68;
+}
+function wrapPx(text,fs,W){
+  const lines=[];let cur="";
+  for(const wd of text.split(" ")){
+    const t=cur?cur+" "+wd:wd;
+    if(!cur||tw(t,fs)<=W)cur=t;else{lines.push(cur);cur=wd}
+  }
+  lines.push(cur);return lines;
+}
+function fit(text,W,maxH){
+  for(let fs=Math.floor(maxH);fs>=8;fs--){
+    const ls=wrapPx(text,fs,W);
+    if(ls.length<=3&&ls.length*fs*1.08<=maxH&&ls.every(l=>tw(l,fs)<=W))return{h:fs,lines:ls.length};
+  }
+  return{h:8,lines:2};
+}
+function allergenKey(){return "lp2_al_"+mode+"_"+item}
+function dietKey(){return "lp2_di_"+mode+"_"+item}
+function selDiet(){const v=store.get(dietKey());return v?v.split(","):[]}
+function selAllergens(){const v=store.get(allergenKey());return v?v.split(","):[]}
+
+/* ---------- What goes on the label ---------- */
+function content(){
+  const by=$("byn").value.trim().toUpperCase().replace(/[\^~]/g,"");
+  if(mode==="custom"){
+    return{name:($("txt").value||" ").toUpperCase().replace(/[\^~]/g,""),rows:[customDateText()],allergens:[],dietary:[],by,nameRatio:0.5,rowRatio:0.17,ready:true};
+  }
+  const c=cat();
+  if(c.noMade){ // sell by = exactly 24 hours after printing
+    const t=new Date(Date.now()+24*3600*1000);
+    const tm=t.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}).toUpperCase();
+    return{name:(item||"PICK AN ITEM").toUpperCase(),rows:[c.by+":",shortDate(t)+", "+tm],allergens:selAllergens(),dietary:selDiet(),by,nameRatio:0.34,rowRatio:0.14,ready:!!item};
+  }
+  const days=$("ud").value;
+  const made="MADE: "+shortDate(addDays(0));
+  const ok=days!=="";
+  const use=c.by+": "+(ok?shortDate(addDays(+days||0)):"SET DAYS");
+  return{name:(item||"PICK AN ITEM").toUpperCase(),rows:c.noMade?[use]:[made,use],allergens:selAllergens(),dietary:selDiet(),by,nameRatio:0.34,rowRatio:c.noMade?0.17:0.115,ready:ok&&!!item};
+}
+
+/* ---------- Layout (shared by preview, ZPL and system print) ---------- */
+function layout(c){
+  const {w,h}=dims();const m=Math.round(w*0.05),bw=w-2*m,items=[];
+  const nf=fit(c.name,bw,Math.floor(h*c.nameRatio));
+  const rowsH=c.rows.map(t=>Math.min(Math.round(h*c.rowRatio),Math.floor(bw*100/Math.max(1,tw(t,100)))));
+  const mk=t=>{
+    for(let fs=Math.round(h*0.085);fs>=8;fs--){const ls=wrapPx(t,fs,bw);if(ls.length<=2&&ls.every(l=>tw(l,fs)<=bw))return{t,h:fs,lines:ls.length}}
+    return{t,h:8,lines:2};
+  };
+  const ex=[];
+  if(c.allergens.length)ex.push(mk("CONTAINS: "+c.allergens.join(", ").toUpperCase()));
+  if(c.dietary&&c.dietary.length)ex.push(mk(c.dietary.join(", ").toUpperCase()));
+  const by=c.by?{t:("BY: "+c.by).slice(0,18),h:Math.max(12,Math.round(h*0.075))}:null;
+  const gap=Math.round(h*0.025),avail=h-2*m-(by?Math.round(by.h*1.3):0);
+  const calc=s=>nf.h*s*nf.lines*1.08+gap*2+3+rowsH.reduce((a,x)=>a+x*s*1.15,0)+ex.reduce((a,e)=>a+e.h*s*e.lines*1.1,0)+(ex.length?gap:0);
+  let s=1;for(let i=0;i<40&&calc(s)>avail;i++)s*=0.95;
+  let y=m+Math.max(0,(avail-calc(s))/2);
+  const nfh=Math.max(8,Math.floor(nf.h*s));
+  items.push({k:"t",y:Math.round(y),h:nfh,lines:nf.lines,text:c.name,a:"C"});y+=nfh*nf.lines*1.08+gap;
+  items.push({k:"l",y:Math.round(y)});y+=3+gap;
+  c.rows.forEach((t,i)=>{const fs=Math.max(8,Math.floor(rowsH[i]*s));items.push({k:"t",y:Math.round(y),h:fs,lines:1,text:t,a:"C"});y+=fs*1.15});
+  if(ex.length)y+=gap*0.5;
+  ex.forEach(e=>{const fs=Math.max(8,Math.floor(e.h*s));items.push({k:"t",y:Math.round(y),h:fs,lines:e.lines,text:e.t,a:"C"});y+=fs*e.lines*1.1});
+  if(by)items.push({k:"t",y:h-Math.round(m*0.8)-by.h,h:by.h,lines:1,text:by.t,a:"R"});
+  return{items,m,bw,w,h};
+}
+
+function zpl(){
+  const L=layout(content());const nx=+$("nx").value||0,ny=+$("ny").value||0,x=Math.max(0,L.m+nx);
+  let z=`^XA\n^MNW\n^CI28\n^PW${L.w}\n^LL${L.h}\n^LH0,0\n^LS0\n`;
+  L.items.forEach(it=>{
+    const y=Math.max(0,it.y+ny);
+    z+=it.k==="l"?`^FO${x},${y}^GB${L.bw},3,3^FS\n`:`^FO${x},${y}^FB${L.bw},${it.lines},0,${it.a},0^A0N,${it.h}^FD${it.text}^FS\n`;
+  });
+  return z+`^PQ${Math.max(1,+$("qty").value||1)}\n^XZ`;
+}
+
+/* ---------- Modern-font image printing ---------- */
+function drawLabel(ctx,L,nx,ny){
+  const x0=L.m+nx;
+  ctx.fillStyle="#fff";ctx.fillRect(0,0,L.w,L.h);
+  ctx.fillStyle="#000";ctx.textBaseline="top";
+  L.items.forEach(it=>{
+    const y=it.y+ny;
+    if(it.k==="l"){ctx.fillRect(x0,y,L.bw,3);return}
+    const ax=it.a==="R"?x0+L.bw:it.a==="L"?x0:x0+L.bw/2;
+    ctx.textAlign=it.a==="R"?"right":it.a==="L"?"left":"center";
+    const fs=it.h;ctx.font="700 "+fs+"px "+FONT;
+    const lines=wrapPx(it.text,fs,L.bw);
+    lines.forEach((l,i)=>ctx.fillText(l,ax,y+i*fs*1.04));
+  });
+}
+function zplCompress(hexRows){
+  let out="",prev=null;
+  for(const r of hexRows){
+    if(r===prev){out+=":";continue}
+    prev=r;
+    if(/^0+$/.test(r)){out+=",";continue}
+    if(/^F+$/.test(r)){out+="!";continue}
+    let body=r,tail="";
+    const z=r.match(/0+$/);if(z){body=r.slice(0,-z[0].length);tail=","}
+    else{const f=r.match(/F+$/);if(f){body=r.slice(0,-f[0].length);tail="!"}}
+    let i=0;
+    while(i<body.length){
+      let j=i;while(j<body.length&&body[j]===body[i])j++;
+      let n=j-i,c=body[i];
+      if(n===1){out+=c}else{
+        while(n>=400){out+="z";n-=400}
+        if(n>=20){out+=String.fromCharCode(103+Math.floor(n/20)-1);n%=20}
+        if(n>0)out+=String.fromCharCode(71+n-1);
+        out+=c;
+      }
+      i=j;
+    }
+    out+=tail;
+  }
+  return out;
+}
+async function zplImage(canvasMaker){
+  try{await Promise.all(["700 20px Nunito","600 20px Nunito"].map(f=>document.fonts.load(f)))}catch(e){}
+  const c=content(),L=layout(c),nx=+$("nx").value||0,ny=+$("ny").value||0;
+  const cv=canvasMaker?canvasMaker(L.w,L.h):Object.assign(document.createElement("canvas"),{width:L.w,height:L.h});
+  const ctx=cv.getContext("2d");drawLabel(ctx,L,nx,ny);
+  const px=ctx.getImageData(0,0,L.w,L.h).data,bpr=Math.ceil(L.w/8),rows=[];
+  for(let y=0;y<L.h;y++){
+    let hex="";
+    for(let b=0;b<bpr;b++){
+      let v=0;
+      for(let bit=0;bit<8;bit++){
+        const x=b*8+bit;let on=0;
+        if(x<L.w){const i=(y*L.w+x)*4;on=(px[i]*0.3+px[i+1]*0.59+px[i+2]*0.11)<150?1:0}
+        v=(v<<1)|on;
+      }
+      hex+=v.toString(16).toUpperCase().padStart(2,"0");
+    }
+    rows.push(hex);
+  }
+  const tot=bpr*L.h;
+  return `^XA\n^MNW\n^CI28\n^PW${L.w}\n^LL${L.h}\n^LH0,0\n^LS0\n^FO0,0^GFA,${tot},${tot},${bpr},${zplCompress(rows)}^FS\n^PQ${Math.max(1,+$("qty").value||1)}\n^XZ`;
+}
+async function zplAuto(){return $("pstyle").value==="img"?await zplImage():zpl()}
+
+/* ---------- Render ---------- */
+function draw(host,L,unit,nx,ny,asInches){
+  // unit: px (or in) per dot
+  host.innerHTML="";
+  L.items.forEach(it=>{
+    const d=document.createElement("div");
+    const x=(L.m+nx)*unit,y=(it.y+ny)*unit,wd=L.bw*unit;
+    const u=asInches?"in":"px";
+    d.style.cssText=`left:${x}${u};top:${y}${u};width:${wd}${u};`;
+    if(it.k==="l"){d.style.height=Math.max(asInches?0.01:1,3*unit)+u;d.style.background="#000"}
+    else{d.style.fontSize=it.h*unit+u;d.style.lineHeight="1";d.style.textAlign=it.a==="R"?"right":it.a==="L"?"left":"center";d.textContent=it.text}
+    host.appendChild(d);
+  });
+}
+function render(){
+  const {wi,hi,w,h}=dims();
+  const maxW=Math.min(window.innerWidth-90,520),maxH=320,ppi=Math.min(maxW/wi,maxH/hi);
+  const p=$("prev");p.style.width=wi*ppi+"px";p.style.height=hi*ppi+"px";
+  const nx=+$("nx").value||0,ny=+$("ny").value||0,L=layout(content());
+  let drawn=false;
+  if($("pstyle").value==="img"){
+    try{
+      const cv=document.createElement("canvas");cv.width=w;cv.height=h;
+      const cx=cv.getContext("2d");
+      if(cx){drawLabel(cx,L,nx,ny);cv.style.cssText="width:100%;height:100%;display:block;position:static";p.innerHTML="";p.appendChild(cv);drawn=true}
+    }catch(e){}
+  }
+  if(!drawn)draw(p,L,ppi*wi/w,nx,ny,false);
+  $("cap").textContent=`${wi} × ${hi} in`;
+  const pa=$("printArea");pa.innerHTML="";
+  for(let i=0;i<Math.max(1,+$("qty").value||1);i++){
+    const pg=document.createElement("div");
+    pg.style.cssText=`position:relative;width:${wi}in;height:${hi}in;overflow:hidden;page-break-after:always;font-family:Arial,sans-serif;font-weight:800;color:#000`;
+    draw(pg,L,1/DPI,nx,ny,true);pa.appendChild(pg);
+  }
+  PERSIST.forEach(i=>store.set("lp2_"+i,$(i).value));
+  store.set("lp2_mode",mode);store.set("lp2_item",item);
+  panels();
+}
+function panels(){
+  // tabs
+  const t=$("tabs");t.innerHTML="";
+  [{id:"custom",name:"Custom"},...CATS].forEach(c=>{
+    const b=document.createElement("button");b.className="chip"+(mode===c.id?" on":"");b.textContent=c.name;
+    b.onclick=()=>{mode=c.id;if(c.id!=="custom"&&!cat().items.includes(item))item="";loadDays();render()};t.appendChild(b);
+  });
+  const pre=mode!=="custom";
+  $("presetBox").classList.toggle("hide",!pre);$("customBox").classList.toggle("hide",pre);
+  if(pre){
+    const c=cat();
+    $("datebox").classList.toggle("hide",!!c.noMade);
+    $("udl").textContent=c.by[0]+c.by.slice(1).toLowerCase()+" in (days)";
+    const it=$("items");it.innerHTML="";
+    c.items.forEach(n=>{const b=document.createElement("button");b.className="chip"+(item===n?" on":"");b.textContent=n;
+      b.onclick=()=>{item=n;render()};it.appendChild(b)});
+    const as=$("als");as.innerHTML="";const sel=selAllergens();
+    ALLERGENS.forEach(a=>{const b=document.createElement("button");b.className="chip al"+(sel.includes(a)?" on":"");b.textContent=a;
+      b.onclick=()=>{if(!item)return;const cur=selAllergens();const nx=cur.includes(a)?cur.filter(x=>x!==a):[...cur,a];
+        store.set(allergenKey(),ALLERGENS.filter(x=>nx.includes(x)).join(","));render()};as.appendChild(b)});
+    const ds=$("dis");ds.innerHTML="";const dsel=selDiet();
+    DIETARY.forEach(a=>{const b=document.createElement("button");b.className="chip di"+(dsel.includes(a)?" on":"");b.textContent=a;
+      b.onclick=()=>{if(!item)return;const cur=selDiet();const nx=cur.includes(a)?cur.filter(x=>x!==a):[...cur,a];
+        store.set(dietKey(),DIETARY.filter(x=>nx.includes(x)).join(","));render()};ds.appendChild(b)});
+  }
+  // custom wording chips
+  const ch=$("chips");ch.innerHTML="";
+  WORDS.forEach(w=>{const b=document.createElement("button");b.className="chip"+($("txt").value.toUpperCase()===w?" on":"");b.textContent=w;
+    b.onclick=()=>{$("txt").value=w;render()};ch.appendChild(b)});
+}
+function loadDays(){if(mode!=="custom")$("ud").value=store.get("lp2_ud_"+mode)||""}
+$("ud").addEventListener("input",()=>{if(mode!=="custom")store.set("lp2_ud_"+mode,$("ud").value)});
+loadDays();
+
+[...PERSIST,"date","date2","ud"].forEach(i=>$(i).addEventListener("input",render));
+window.addEventListener("resize",render);render();
+try{Promise.all(["700 20px Nunito","600 20px Nunito"].map(f=>document.fonts.load(f))).then(render)}catch(e){}
+setInterval(()=>{if(cat()&&cat().noMade)render()},30000);
+
+/* ---------- Lock ---------- */
+const LOCKED=["size","cw","ch","nx","ny"];
+function applyLock(){
+  const on=store.get("lp2_locked")==="1";
+  LOCKED.forEach(i=>$(i).disabled=on);
+  $("lock").textContent=on?"🔒 Locked – tap to unlock":"🔓 Lock label setup (size + nudge)";
+  $("lockcap").textContent=on?"Size and nudge are saved and can't be changed until you unlock.":"Locking saves the size and nudge and stops accidental changes.";
+}
+$("lock").onclick=()=>{store.set("lp2_locked",store.get("lp2_locked")==="1"?"0":"1");applyLock()};
+applyLock();
+
+/* ---------- Printing ---------- */
+function say(t,ok){const m=$("msg");m.textContent=t;m.className=ok?"ok":""}
+function canPrint(){
+  const c=content();
+  if(mode!=="custom"){
+    if(!item){say("Pick an item first.");return false}
+    if(!cat().noMade&&$("ud").value===""){say("Set the "+cat().by.toLowerCase().replace(" ","-")+" days first.");return false}
+  }
+  if(!c.by){say("Enter who is making the label (top of page).");return false}
+  return true;
+}
+let bleChar=null,bleChunk=100;
+async function bleSend(str){
+  const SVC="38eb4a80-c570-11e3-9507-0002a5d5c51b",CH="38eb4a82-c570-11e3-9507-0002a5d5c51b";
+  try{
+    if(!navigator.bluetooth)throw new Error("Open this file in Chrome on Android");
+    if(!bleChar||!bleChar.service.device.gatt.connected){
+      say("Choose your printer…");
+      const dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:[SVC]});
+      say("Connecting to "+(dev.name||"printer")+"…");
+      const srv=await Promise.race([dev.gatt.connect(),new Promise((_,j)=>setTimeout(()=>j(new Error("Connect timed out. Close the Zebra app and other devices, then retry")),15000))]);
+      say("Finding print service…");
+      bleChar=await (await srv.getPrimaryService(SVC)).getCharacteristic(CH);
+    }
+    const data=new TextEncoder().encode(str);say("Printing…");
+    let cs=bleChunk;
+    for(let i=0;i<data.length;){
+      try{await bleChar.writeValueWithoutResponse(data.slice(i,i+cs));i+=cs;await new Promise(r=>setTimeout(r,cs>20?8:15))}
+      catch(err){if(cs>20){cs=20;bleChunk=20}else throw err}
+    }
+    say("Sent ✓",true);
+  }catch(e){bleChar=null;say("Bluetooth failed: "+e.message)}
+}
+$("bb").onclick=async()=>{if(canPrint()){say("Preparing label…");bleSend(await zplAuto())}};
+$("bje").onclick=$("bje2").onclick=()=>bleSend("~JE");
+$("bcal").onclick=()=>bleSend("~JC");
+$("bd").onclick=async()=>{if(!canPrint())return;const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([await zplAuto()],{type:"text/plain"}));a.download="label.zpl";a.click()};
+$("bs").onclick=()=>{
+  if(!canPrint())return;
+  const {wi,hi}=dims();let st=document.getElementById("pg");if(!st){st=document.createElement("style");st.id="pg";document.head.appendChild(st)}
+  st.textContent=`@page{size:${wi}in ${hi}in;margin:0}`;window.print()};
+$("bp").onclick=async()=>{
+  if(!canPrint())return;
+  try{
+    const dev=await (await fetch("http://localhost:9100/default?type=printer")).json();
+    if(!dev||!dev.name)throw new Error("No default Zebra printer found");
+    const w=await fetch("http://localhost:9100/write",{method:"POST",body:JSON.stringify({device:dev,data:await zplAuto()})});
+    if(!w.ok)throw new Error("Printer rejected job");
+    say("Sent to "+dev.name,true);
+  }catch(e){say("Browser Print not reachable ("+e.message+")")}
+};
+$("bn").onclick=async()=>{
+  if(!canPrint())return;
+  const ip=$("ip").value.trim();
+  if(!ip){say("Enter the printer's IP first.");return}
+  try{await fetch("http://"+ip+"/pstprnt",{method:"POST",mode:"no-cors",body:await zplAuto()});
+    say("Sent to "+ip+" (browsers can't confirm delivery)",true)}
+  catch(e){say("Couldn't reach "+ip+": "+e.message)}
+};
+</script></body></html>
