@@ -454,13 +454,20 @@ async function bleSend(str){
       bleChar=await (await srv.getPrimaryService(SVC)).getCharacteristic(CH);
     }
     const data=new TextEncoder().encode(str);say("Printing…");
-    let cs=bleChunk;
+    const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+    const pr=bleChar.properties||{};
+    const acked=ios&&pr.write;               // iPad/iPhone (Bluefy): acknowledged writes are more reliable
+    let cs=acked?20:bleChunk;
     for(let i=0;i<data.length;){
-      try{await bleChar.writeValueWithoutResponse(data.slice(i,i+cs));i+=cs;await new Promise(r=>setTimeout(r,cs>20?8:15))}
-      catch(err){if(cs>20){cs=20;bleChunk=20}else throw err}
+      const part=data.slice(i,i+cs);
+      try{
+        if(acked)await bleChar.writeValueWithResponse(part);
+        else{await bleChar.writeValueWithoutResponse(part);await new Promise(r=>setTimeout(r,cs>20?8:15))}
+        i+=cs;
+      }catch(err){if(cs>20){cs=20;bleChunk=20}else throw err}
     }
     say("Sent ✓",true);
-  }catch(e){bleChar=null;say("Bluetooth failed: "+e.message)}
+  }catch(e){bleChar=null;say("Bluetooth failed: "+(e.name?e.name+" – ":"")+e.message)}
 }
 $("bb").onclick=async()=>{if(canPrint()){say("Preparing label…");bleSend(await zplAuto())}};
 $("bje").onclick=$("bje2").onclick=()=>bleSend("~JE");
